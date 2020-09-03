@@ -1,6 +1,10 @@
 // Import Express
 const express = require("express");
 
+// Import helper functions
+// import { getFizzBuzz, showSuccess, showError  } from "./helperFunctions.js";
+const { getFizzBuzz, showSuccess, showError  } =  require("./helperFunctions");
+
 // Express Initialize
 const app = express();
 
@@ -16,15 +20,16 @@ app.listen(port, () => {
   console.log("listen port 8000");
 });
 
+
 // Route to get the data response
 app.post("/getFizzBuzzData", (req, res) => {
   let isError = false;
   let error = null;
   let responseData = [];
 
-  if (req.body.number) {
-    if (typeof req.body.number == "number") {
-      responseData = getFizzBuzz(req.body.number);
+  if (req.body.count) {
+    if (typeof req.body.count == "number") {
+      responseData = getFizzBuzz(req.body.count);
       showSuccess(res, { isError, responseData });
     } else {
       isError = true;
@@ -32,34 +37,8 @@ app.post("/getFizzBuzzData", (req, res) => {
       showError(res, { isError, isError });
     }
   } else {
-    (isError = true), (error = "Please Enter value");
+    (isError = true), (error = "Please pass the parameter named count (In Request Body).");
     showError(res, { isError, error });
   }
 });
 
-// Helper function for Error
-const showError = (res, errorResponse = {}) => {
-  res.status(400).json(errorResponse);
-};
-
-// Helper function for Success response
-const showSuccess = (res, successResponse = {}) => {
-  res.status(200).json(successResponse);
-};
-
-
-/**
- * Program to return the FizzBuzz data based on value
- * @param {number} value 
- */
-const getFizzBuzz = (value = 0) => {
-  var output = [];
-
-  for (var i = 1; i < value; i++) {
-    if (i % 15 == 0) output.push("FizzBuzz");
-    else if (i % 3 == 0) output.push("Fizz");
-    else if (i % 5 == 0) output.push("Buzz");
-    else output.push(i);
-  }
-  return output;
-};
