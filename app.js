@@ -1,15 +1,15 @@
 // Import Express
-const express = require("express");
+import express from 'express';
+// Body Parser to get request body
+import  bodyParser from 'body-parser';
 
 // Import helper functions
-// import { getFizzBuzz, showSuccess, showError  } from "./helperFunctions.js";
-const { getFizzBuzz, showSuccess, showError  } =  require("./helperFunctions");
+import { getFizzBuzz } from './helperFunctions.js';
 
 // Express Initialize
 const app = express();
 
-// Body Parser to get request body
-const bodyParser = require("body-parser");
+// dotenv
 
 // Body Parser MiddleWare
 app.use(bodyParser.json());
@@ -17,28 +17,32 @@ app.use(bodyParser.json());
 // Start the APP at PORT
 const port = 8000;
 app.listen(port, () => {
-  console.log("listen port 8000");
+  console.log('listen port 8000');
 });
 
+app.use((req, res, next) => {
+  res.error = (response, status = 400) => {
+    res.status(status).json({  status: 'error', data: response });
+  };
 
-// Route to get the data response
-app.post("/getFizzBuzzData", (req, res) => {
-  let isError = false;
-  let error = null;
-  let responseData = [];
+  res.api = (response, status = 200) => {
+    res.status(status).json({ status: 'ok', data: response});
+  };
 
-  if (req.body.count) {
-    if (typeof req.body.count == "number") {
-      responseData = getFizzBuzz(req.body.count);
-      showSuccess(res, { isError, responseData });
-    } else {
-      isError = true;
-      error = "Please Enter Numbers only value";
-      showError(res, { isError, isError });
-    }
-  } else {
-    (isError = true), (error = "Please pass the parameter named count (In Request Body).");
-    showError(res, { isError, error });
+  next();
+});
+
+app.post('/getFizzBuzzData', (req, res) => {
+  const { count } = req.body;
+
+  if (!count) {
+    return res.error({ error: 'Please pass the parameter named count (In Request Body).' });
   }
-});
 
+  if (typeof count !== 'number') {
+    return res.error({ error: 'Please Enter Numbers only value' });
+  }
+
+  const responseData = getFizzBuzz(count);
+  return res.api(responseData);
+});
